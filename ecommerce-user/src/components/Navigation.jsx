@@ -11,7 +11,7 @@ function Navigation({ navigationMenu }) {
 
     return (
         <nav className="navigation">
-            <div className="nav-content">
+            <div className="main-nav-content">
                 <div className="menu-button" onClick={handleMenuToggle}>
                     <MenuIcon className="menu-icon" />
                 </div>

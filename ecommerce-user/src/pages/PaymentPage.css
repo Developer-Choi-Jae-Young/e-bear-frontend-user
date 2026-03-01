@@ -1,0 +1,207 @@
+.payment-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+    background-color: #fff;
+    font-family: 'Pretendard', sans-serif;
+  }
+  
+  .payment-main {
+    margin-top: 20px;
+  }
+  
+  .product-info-card {
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    border: 1px solid #e5e5e5;
+    margin-bottom: 20px;
+    gap: 20px;
+  }
+  
+  .product-image {
+    height: 100%;
+    flex-shrink: 0;
+    overflow: hidden;
+  }
+
+  .product-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background-color: #f9f9f9;
+  }
+  
+  .brand-name {
+    display: block;
+    margin-bottom: 4px;
+  }
+  
+  .product-name {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 8px;
+  }
+  
+  .product-price {
+    font-size: 14px;
+    color: #333;
+  }
+
+  .product-amount {
+    font-size: 14px;
+    color: #727272;
+  }
+  
+  .seller-info {
+    font-size: 12px;
+    color: #666;
+    text-decoration: underline;
+    margin-top: 10px;
+    cursor: pointer;
+  }
+  
+  .info-list-section {
+    border-top: 1px solid #333;
+    margin-bottom: 30px;
+  }
+  
+  .info-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 10px;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .info-label {
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+    width: 120px;
+  }
+  
+  .info-value {
+    font-size: 14px;
+    color: #666;
+    text-align: right;
+    flex: 1;
+  }
+  
+  .shipping-select {
+    border: 1px solid #ddd;
+    padding: 8px;
+    width: 250px;
+    font-size: 14px;
+  }
+  
+  .section-title {
+    font-size: 16px;
+    font-weight: bold;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+  }
+  
+  .point-input-group {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 30px;
+  }
+  
+  .point-input-group input {
+    flex: 1;
+    padding: 12px;
+    border: 1px solid #ddd;
+    font-size: 14px;
+  }
+  
+  .point-btn {
+    background-color: #000;
+    color: #fff;
+    padding: 0 20px;
+    border: none;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  
+  .method-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 40px;
+  }
+  
+  .method-item {
+    padding: 15px;
+    border: 1px solid #ddd;
+    background-color: #fff;
+    cursor: pointer;
+    font-size: 14px;
+    text-align: center;
+    transition: all 0.2s;
+  }
+  
+  .method-item.active {
+    border: 2px solid #000;
+    font-weight: bold;
+  }
+  
+  .final-payment-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 30px 0;
+    border-top: 1px solid #eee;
+  }
+  
+  .total-price-row {
+    font-size: 18px;
+    font-weight: bold;
+  }
+  
+  .total-price {
+    margin-left: 20px;
+    font-size: 22px;
+  }
+  
+  .pay-submit-btn {
+    background-color: #000;
+    color: #fff;
+    width: 200px;
+    padding: 18px;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+  }
+  
+  @media (max-width: 768px) {
+    .method-grid {
+      grid-template-columns: repeat(2, 1fr); /* 모바일은 2열 */
+    }
+  
+    .shipping-select {
+      width: 100%;
+      margin-top: 10px;
+    }
+  
+    .info-row {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 8px;
+    }
+  
+    .info-value {
+      text-align: left;
+      width: 100%;
+    }
+  
+    .final-payment-section {
+      flex-direction: column;
+      gap: 20px;
+    }
+  
+    .pay-submit-btn {
+      width: 100%;
+    }
+  }

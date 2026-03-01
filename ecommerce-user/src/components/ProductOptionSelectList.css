@@ -227,8 +227,8 @@ dl, ul, ol, menu, li, dd {
     .product-options-list {
         overflow-y: auto; 
         padding-right: 16px; 
-        min-height: 0; 
-        max-height: 400px;
+        min-height: 200px;
+        max-height: 40vh;
     }
 }
 
@@ -236,7 +236,7 @@ dl, ul, ol, menu, li, dd {
     .product-options-list {
         overflow-y: auto; 
         padding-right: 16px; 
-        min-height: 0; 
-        max-height: 400px;
+        min-height: 200px;
+        max-height: 40vh;
     }
 }

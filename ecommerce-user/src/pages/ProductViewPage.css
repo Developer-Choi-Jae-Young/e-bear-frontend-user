@@ -414,13 +414,13 @@
     position: absolute;
     bottom: 113px; 
     left: 0;
-    
     width: 100%;
     max-height: 70vh; 
     background-color: white;
     border-top-left-radius: 16px;
     border-top-right-radius: 16px;
     border: solid 1px black;
+    min-height: 400px;
 }
 
 

@@ -2,7 +2,7 @@ import React from 'react';
 import {  ChevronDownIcon } from "../components/CustomTag"
 import './ProductViewComboBox.css';
 
-function ProductViewComboBox({ comboOptionList, comboBox, handleComboBox }) {
+function ProductViewComboBox({ comboOptionList, comboBox, handleComboBox, handleComboBoxItem }) {
   
     return (
         <div className="comboBox-section">
@@ -17,10 +17,10 @@ function ProductViewComboBox({ comboOptionList, comboBox, handleComboBox }) {
                     {comboOptionList.map((data, index) => {
                         return (
                         <li className="comboBox-option-item">
-                            <a onClick={() => handleComboBoxItem(index)}>
+                            <a onClick={() => handleComboBoxItem(data)}>
                                 <div className="comboBox-header-option">
-                                    <span>{data.optionSubject}</span>
-                                    <span>{data.optionPrice}</span>
+                                    <span>{data.productOptionName}</span>
+                                    <span>{data.productOptionPrice}</span>
                                 </div>
                             </a>
                         </li>

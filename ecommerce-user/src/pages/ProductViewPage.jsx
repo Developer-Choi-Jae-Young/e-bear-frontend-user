@@ -15,10 +15,10 @@ const ProductViewPage = () => {
     const { id } = useParams(); 
     const [product, setProduct] = useState(null);
     const [comboBox, setComboBox] = useState(false);
-    const [comboBoxItem, setComboBoxItem] = useState(0);
     const [isPopupOpen, setIsPopupOpen] = useState(false);
     const [expanded, setExpanded] = useState(false);
     const [isMobileOptionsOpen, setIsMobileOptionsOpen] = useState(false);
+    const [selectProductOptionList, setSelectProductOptionList] = useState([]);
 
     const isMobile = useMediaQuery('(max-width: 768px)');
     const [activeTab, setActiveTab] = useState('');
@@ -48,9 +48,24 @@ const ProductViewPage = () => {
     }
 
     const handleComboBoxItem = (item) => {
-        setComboBoxItem(item);
+        const isAlreadySelected = selectProductOptionList.find(
+            (option) => option.optionSubject === item.optionSubject
+        );
+    
+        if (isAlreadySelected) {
+            alert("이미 선택된 옵션입니다.");
+        } else {
+            const newOption = {
+                optionSubject: item.productOptionName,
+                optionPrice: item.productOptionPrice,
+                optionCount: 1,
+            };
+            
+            setSelectProductOptionList([...selectProductOptionList, newOption]);
+        }
+
         setComboBox(false);
-    }
+    };
 
     const handleComboBox = () => {
         setComboBox(!comboBox);
@@ -65,27 +80,6 @@ const ProductViewPage = () => {
         {rate: 3.5, title: "제목", context: "내용", name: "이름", date: "2025-07-26"},
     ];
 
-    const qnalist = [
-        {id: 1, name: "김철수", title: "제목", context: "내용"},
-        {id: 2, name: "김철수", title: "제목", context: "내용"},
-        {id: 3, name: "김철수", title: "제목", context: "내용"},
-        {id: 4, name: "김철수", title: "제목", context: "내용"},
-        {id: 5, name: "김철수", title: "제목", context: "내용"},
-        {id: 6, name: "김철수", title: "제목", context: "내용"},
-        {id: 7, name: "김철수", title: "제목", context: "내용"}
-    ];
-
-    const comboOptionList = [
-        {optionSubject: "이름", optionPrice: 12000},
-        {optionSubject: "이름", optionPrice: 12000},
-        {optionSubject: "이름", optionPrice: 12000},
-        {optionSubject: "이름", optionPrice: 12000},
-        {optionSubject: "이름", optionPrice: 12000},
-        {optionSubject: "이름", optionPrice: 12000},
-        {optionSubject: "이름", optionPrice: 12000},
-        {optionSubject: "이름", optionPrice: 12000}
-    ]
-
     const productViewData = {
         currentViewImg: "https://www.letemsvetemapplem.eu/wp-content/uploads/2025/02/iPhone-17-Pro-1536x1536.jpeg.webp",
         subViewImg: [
@@ -93,12 +87,8 @@ const ProductViewPage = () => {
             "https://www.letemsvetemapplem.eu/wp-content/uploads/2025/02/iPhone-17-Pro-1536x1536.jpeg.webp",
             "https://www.letemsvetemapplem.eu/wp-content/uploads/2025/02/iPhone-17-Pro-1536x1536.jpeg.webp"
         ],
-        seller: "유닉스",
-        productCategoryNavigation: "뷰티>헤어기기>헤어드라이기",
-        productSubject: "갤럭시 팝니다 갤럭시 팝니다 갤럭시 팝니다",
         productPrice: "420,000 ~ ",
         productFavarite: false,
-        productViewContent: "내용이 들어갑니다.",
         productViewRetrunContent: "상품 수령 후 7일 이내에 신청하실 수 있습니다. 단, 제품이 표시·광고 내용과 다르거나, 계약과 다르게 이행된 경우는 제품 수령일부터 3개월 이내,\n 그 사실을 안 날 또는 알 수 있었던 날부터 30일 이내에 교환/반품이 가능합니다.\n\n 추가적으로 다음의 경우 해당하는 반품/교환은 신청이 불가능할 수 있습니다.\n\n 소비자의 책임 있는 사유로 상품 등이 멸실 또는 훼손된 경우 (단지, 상품 확인을 위한 포장 훼손 제외)\n 소비자의 사용 또는 소비에 의해 상품 등의 가치가 현저히 감소한 경우\n 시간의 경과에 의해 재판매가 곤란할 정도로 상품 등의 가치가 현저히 감소한 경우\n 복제가 가능한 상품 등의 포장을 훼손한 경우\n 소비자의 주문에 따라 개별적으로 생산되는 상품이 제작에 들어간 경우"
     }
 
@@ -113,7 +103,7 @@ const ProductViewPage = () => {
         try {
             const response = await api.get(`/product/detail/${id}`);
             const data = response;
-
+            console.log(data);
             setProduct({
                 productId: data.productId,
                 productName: data.productName,
@@ -122,29 +112,66 @@ const ProductViewPage = () => {
                 seller: data.seller,
                 sellerImg: data.sellerImg,
                 category: data.category,
-                productOptions: data.productOptions || [],
-                reviews: data.reviews || [],
-                qnas: data.qnas || []
+                comboOptionList: data.productOptions || [],
+                review: data.reviews || [],
+                qnalist: data.qnas || []
             });
         } catch (err) {
             console.error("상품 목록 조회 실패:", err);
             console.error("status:", err.response?.status);
             console.error("data:", err.response?.data);
             setError("상품 목록을 불러오지 못했습니다.");
-        } finally {
-            setLoading(false);
         }
+    };
+
+    const handleCountChange = (index, newCount) => {
+        const count = parseInt(newCount);
+        if (isNaN(count) || count < 1) return; // 1보다 작은 값 방지
+
+        setSelectProductOptionList(prevList => 
+            prevList.map((item, i) => i === index ? { ...item, optionCount: count } : item)
+        );
+    };
+
+    const updateCount = (index, delta) => {
+        setSelectProductOptionList(prevList =>
+            prevList.map((item, i) => {
+                if (i === index) {
+                    const nextCount = item.optionCount + delta;
+                    return { ...item, optionCount: nextCount < 1 ? 1 : nextCount };
+                }
+                return item;
+            })
+        );
+    };
+
+    const handleDeleteOption = (index) => {
+        setSelectProductOptionList(prevList => prevList.filter((_, i) => i !== index));
     };
     
     useEffect(() => {
         setActiveTab(productMenu[0].value);
         fetchProduct();
+
+        setSelectProductOptionList ([]);
     }, []);
 
     if (!product) {
         return <div className="loading-container">데이터를 불러오는 중입니다...</div>;
     }
 
+    const getCategoryPath = (category) => {
+        if (!category) return "";
+        const names = [];
+        let current = category;
+        
+        while (current) {
+            names.push(current.categoryName);
+            current = current.child;
+        }
+        
+        return names.join(" > ");
+    };
     return (
         <>
             <div className="product-view-container">
@@ -164,17 +191,17 @@ const ProductViewPage = () => {
                             </div>
                             <div className="product-views">
                                 <div className="product-header-row">
-                                    <span className="product-info-category">{productViewData.productCategoryNavigation}</span>
+                                    <span className="product-info-category">{getCategoryPath(product.category)}</span>
                                     <div className="product-view-contents align-items-center">
                                         <AvatarCustom className="profile-avatar h-5 w-5">
                                             <AvatarFallback className="avatar-fallback">
                                                 <UserIcon className="avatar-icon" />
                                             </AvatarFallback>
                                         </AvatarCustom>
-                                        <span className="profile-name">{productViewData.seller}</span>
+                                        <span className="profile-name">{product.seller}</span>
                                     </div>
                                 </div>
-                                <div className="product-info-content">{productViewData.productSubject}</div>
+                                <div className="product-info-content">{product.productName}</div>
                                 <div className="product-info-content product-header-row">
                                     <span>{productViewData.productPrice}원</span>
                                     {productViewData.productFavarite ? <HeartFillIcon className="heart-icon" /> : <HeartIcon className="icon heart-icon"/>}
@@ -204,8 +231,7 @@ const ProductViewPage = () => {
                                     <span>{productMenu[0].name}</span>
                                     <hr />
                                 </div>
-                                <div className="product-views-content">
-                                    {productViewData.productViewContent}
+                                <div className="product-views-content" dangerouslySetInnerHTML={{ __html: product.content }}>
                                 </div>
                             </>
                         )}
@@ -218,13 +244,27 @@ const ProductViewPage = () => {
                                 </div>
                                 <div>
                                     <div className="review-section">
-                                        {review.map((data, index) => {
-                                            return (<ReviewCard key={index}  rate={data.rate} title={data.title} context={data.context} name={data.name} date={data.date} />);    
-                                        })}
+                                        {product.reviews && product.reviews.length > 0 ? (
+                                            product.reviews.map((data, index) => (
+                                                <ReviewCard 
+                                                    key={index} 
+                                                    rate={data.reviewPoint} 
+                                                    title={data.reviewTitle} 
+                                                    context={data.reviewContent} 
+                                                    name={data.reviewer} 
+                                                    date={data.regDttm} 
+                                                />
+                                            ))
+                                        ) : (
+                                            <div className="no-data-message">작성된 리뷰가 없습니다.</div>
+                                        )}
                                     </div>
-                                    <div className="more-button-section">
-                                        <button className="more-button">더보기</button>
-                                    </div>
+
+                                    {product.reviews?.length > 5 && (
+                                        <div className="more-button-section">
+                                            <button className="more-button">더보기</button>
+                                        </div>
+                                    )}
                                 </div>
                             </>
                         )}
@@ -239,9 +279,19 @@ const ProductViewPage = () => {
                                     <hr />
                                 </div>
                                 <div className="qna-section">
-                                    {qnalist.map((data, index) => {
-                                        return <QnaAccordion data={data} index={index} handleChange={handleChange} isExpanded={expanded === data.id} />
-                                    })}
+                                {product.qnas && product.qnas.length > 0 ? (
+                                    product.qnas.map((data, index) => (
+                                        <QnaAccordion 
+                                            key={data.qnaId || index} 
+                                            data={data} 
+                                            index={index} 
+                                            handleChange={handleChange} 
+                                            isExpanded={expanded === (data.qnaId || index)} 
+                                        />
+                                    ))
+                                ) : (
+                                    <div className="no-data">등록된 문의사항이 없습니다.</div>
+                                )}
                                 </div>
                             </>
                         )}
@@ -262,8 +312,11 @@ const ProductViewPage = () => {
                     {( !isMobile ) && (
                         <div className="product-view-contents-right-area">
                             <div className="product-view-contents-right">
-                                <ProductViewComboBox comboOptionList={comboOptionList} comboBox={comboBox} handleComboBox={handleComboBox} />
-                                <ProductOptionSelectList selectProductOptionList={product.productOptions} />
+                                <ProductViewComboBox comboOptionList={product.comboOptionList} comboBox={comboBox} handleComboBox={handleComboBox} handleComboBoxItem={handleComboBoxItem} />
+                                <ProductOptionSelectList selectProductOptionList={selectProductOptionList} 
+                                                            handleCountChange={handleCountChange}
+                                                            updateCount={updateCount}
+                                                            handleDeleteOption={handleDeleteOption} />
 
                                 <div className="l_product_buy_result">
                                     <div>
@@ -301,8 +354,11 @@ const ProductViewPage = () => {
                                     </div>
                                     
                                     <div className="mobile_buy_option_area">
-                                        <ProductViewComboBox comboOptionList={comboOptionList} comboBox={comboBox} handleComboBox={handleComboBox} />
-                                        <ProductOptionSelectList selectProductOptionList={product.productOptions} />
+                                        <ProductViewComboBox comboOptionList={product.comboOptionList} comboBox={comboBox} handleComboBox={handleComboBox} handleComboBoxItem={handleComboBoxItem}/>
+                                        <ProductOptionSelectList selectProductOptionList={selectProductOptionList} 
+                                                            handleCountChange={handleCountChange}
+                                                            updateCount={updateCount}
+                                                            handleDeleteOption={handleDeleteOption} />
                                     </div>
                                 </div>
                             )}

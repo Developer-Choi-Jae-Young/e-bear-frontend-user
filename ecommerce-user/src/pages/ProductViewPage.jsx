@@ -9,9 +9,11 @@ import PopUp from "../components/PopUp"
 import QnaAccordion from "../components/QnaAccordion";
 import ProductViewComboBox from "../components/ProductViewComboBox";
 import ProductOptionSelectList from "../components/ProductOptionSelectList";
+import api from "../api/axios";
 
 const ProductViewPage = () => {
     const { id } = useParams(); 
+    const [product, setProduct] = useState(null);
     const [comboBox, setComboBox] = useState(false);
     const [comboBoxItem, setComboBoxItem] = useState(0);
     const [isPopupOpen, setIsPopupOpen] = useState(false);
@@ -84,17 +86,6 @@ const ProductViewPage = () => {
         {optionSubject: "이름", optionPrice: 12000}
     ]
 
-    const selectProductOptionList = [
-        {optionSubject: "008_블러밍 스트링 자수 반팔 데님 셔츠 자켓_52SH443 / 라이트블루/FREE(55~66)[58444-1]", optionPrice: 26800, optionCount: 1},
-        {optionSubject: "008_블러밍 스트링 자수 반팔 데님 셔츠 자켓_52SH443 / 라이트블루/FREE(55~66)[58444-1]", optionPrice: 26800, optionCount: 1},
-        {optionSubject: "008_블러밍 스트링 자수 반팔 데님 셔츠 자켓_52SH443 / 라이트블루/FREE(55~66)[58444-1]", optionPrice: 26800, optionCount: 1},
-        {optionSubject: "008_블러밍 스트링 자수 반팔 데님 셔츠 자켓_52SH443 / 라이트블루/FREE(55~66)[58444-1]", optionPrice: 26800, optionCount: 1},
-        {optionSubject: "008_블러밍 스트링 자수 반팔 데님 셔츠 자켓_52SH443 / 라이트블루/FREE(55~66)[58444-1]", optionPrice: 26800, optionCount: 1},
-        {optionSubject: "008_블러밍 스트링 자수 반팔 데님 셔츠 자켓_52SH443 / 라이트블루/FREE(55~66)[58444-1]", optionPrice: 26800, optionCount: 1},
-        {optionSubject: "008_블러밍 스트링 자수 반팔 데님 셔츠 자켓_52SH443 / 라이트블루/FREE(55~66)[58444-1]", optionPrice: 26800, optionCount: 1},
-        {optionSubject: "008_블러밍 스트링 자수 반팔 데님 셔츠 자켓_52SH443 / 라이트블루/FREE(55~66)[58444-1]", optionPrice: 26800, optionCount: 1}
-    ]
-
     const productViewData = {
         currentViewImg: "https://www.letemsvetemapplem.eu/wp-content/uploads/2025/02/iPhone-17-Pro-1536x1536.jpeg.webp",
         subViewImg: [
@@ -117,10 +108,42 @@ const ProductViewPage = () => {
         {name:"QnA", value:"qna"},
         {name:"반품/교환", value:"return"}
     ]
+
+    const fetchProduct = async () => {
+        try {
+            const response = await api.get(`/product/detail/${id}`);
+            const data = response;
+
+            setProduct({
+                productId: data.productId,
+                productName: data.productName,
+                thumbnail: data.thumbnail,
+                content: data.content,
+                seller: data.seller,
+                sellerImg: data.sellerImg,
+                category: data.category,
+                productOptions: data.productOptions || [],
+                reviews: data.reviews || [],
+                qnas: data.qnas || []
+            });
+        } catch (err) {
+            console.error("상품 목록 조회 실패:", err);
+            console.error("status:", err.response?.status);
+            console.error("data:", err.response?.data);
+            setError("상품 목록을 불러오지 못했습니다.");
+        } finally {
+            setLoading(false);
+        }
+    };
     
     useEffect(() => {
         setActiveTab(productMenu[0].value);
+        fetchProduct();
     }, []);
+
+    if (!product) {
+        return <div className="loading-container">데이터를 불러오는 중입니다...</div>;
+    }
 
     return (
         <>
@@ -240,7 +263,7 @@ const ProductViewPage = () => {
                         <div className="product-view-contents-right-area">
                             <div className="product-view-contents-right">
                                 <ProductViewComboBox comboOptionList={comboOptionList} comboBox={comboBox} handleComboBox={handleComboBox} />
-                                <ProductOptionSelectList selectProductOptionList={selectProductOptionList} />
+                                <ProductOptionSelectList selectProductOptionList={product.productOptions} />
 
                                 <div className="l_product_buy_result">
                                     <div>
@@ -279,7 +302,7 @@ const ProductViewPage = () => {
                                     
                                     <div className="mobile_buy_option_area">
                                         <ProductViewComboBox comboOptionList={comboOptionList} comboBox={comboBox} handleComboBox={handleComboBox} />
-                                        <ProductOptionSelectList selectProductOptionList={selectProductOptionList} />
+                                        <ProductOptionSelectList selectProductOptionList={product.productOptions} />
                                     </div>
                                 </div>
                             )}

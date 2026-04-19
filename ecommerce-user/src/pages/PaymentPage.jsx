@@ -1,12 +1,14 @@
 import { useState } from "react";
 import "./PaymentPage.css";
-import useMediaQuery from "@mui/material/useMediaQuery";
 import MyPageHeader from "../components/MyPageHeader";
+import PopUp from "../components/PopUp";
+import { CheckoutPage } from "./toss/CheckoutPage";
 
 const PaymentPage = () => {
-  const isMobile = useMediaQuery("(max-width: 768px)");
   const [paymentMethod, setPaymentMethod] = useState("card");
   const [point, setPoint] = useState("");
+  const [isCheckoutOpen, setIsCheckoutOpen] = useState(false);
+  const [orderId, setOrderId] = useState(null); //서버에서 발급 받은 orderId 저장 상태 확인
 
   const products = [
     {
@@ -32,6 +34,66 @@ const PaymentPage = () => {
   const handleFullPoint = () => {
     setPoint("7500");
   };
+
+  // 결제하기 버튼 클릭 시 실행되는 로직
+  // -> 결제 상태 변경(웹훅을 위해)
+  const handlePaymentSubmit = async () => {
+    try {
+      // ==========================================
+      // 1. 주문 저장 API 호출 (orderId 발급)
+      // ==========================================
+      const orderResponse = await fetch("http://localhost:8888/order/save", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          // 필요하다면 Authorization 토큰 추가
+        },
+        body: JSON.stringify({
+          // TODO: OrderDto에 맞는 주문 데이터 (상품목록, 배송지 등) 세팅
+        }),
+      });
+
+      if (!orderResponse.ok) {
+        throw new Error("주문 정보 저장 중 오류가 발생했습니다.");
+      }
+
+      // 서버(/order/save)에서 내려준 OrderSaveResultDto를 파싱
+      const orderData = await orderResponse.json();
+      const serverOrderId = orderData.orderPaymentId;
+
+      // ==========================================
+      // 2. 결제 준비 API 호출 (받아온 orderPaymentId 전달)
+      // ==========================================
+      if(serverOrderId){
+          const paymentResponse = await fetch("http://localhost:8888/api/payments/ready", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            orderId: serverOrderId, // 발급받은 orderId를 그대로 결제 서버로 넘김
+            paymentAmount: 100, 
+            type: paymentMethod.toUpperCase(), 
+          }),
+        });
+
+        if (!paymentResponse.ok) {
+          throw new Error("결제 준비 중 서버 오류가 발생했습니다.");
+        }
+
+        // ==========================================
+        // 3. 모든 통신 성공 시 결제창 오픈
+        // ==========================================
+        setOrderId(serverOrderId); // 상태 업데이트
+        setIsCheckoutOpen(true);   // 토스 팝업 오픈
+      }
+      
+
+    } catch (error) {
+      console.error("결제 진행 에러:", error);
+      alert(error.message || "서버와 연결할 수 없습니다.");
+    }
+  };  
 
   return (
     <div className="payment-container">
@@ -94,7 +156,7 @@ const PaymentPage = () => {
         <section className="payment-method-section">
           <h4 className="section-title">결제 수단</h4>
           <div className="method-grid">
-            {['card', 'bank', 'virtual', 'pay'].map((method) => (
+            {['card', 'bank', 'pay'].map((method) => (
               <button
                 key={method}
                 className={`method-item ${paymentMethod === method ? 'active' : ''}`}
@@ -102,7 +164,6 @@ const PaymentPage = () => {
               >
                 {method === 'card' && '카드'}
                 {method === 'bank' && '계좌이체'}
-                {method === 'virtual' && '가상계좌'}
                 {method === 'pay' && '페이'}
               </button>
             ))}
@@ -114,9 +175,20 @@ const PaymentPage = () => {
             <span>최종 결제금액</span>
             <span className="total-price">{totalPrice.toLocaleString()}원</span>
           </div>
-          <button className="pay-submit-btn">결제하기</button>
+          <button
+            className="pay-submit-btn"
+            onClick={handlePaymentSubmit}
+          >
+            결제하기
+          </button>
         </section>
       </main>
+      <PopUp
+        isOpen={isCheckoutOpen}
+        onClose={() => setIsCheckoutOpen(false)}
+        title={"결제하기"}
+        component={<CheckoutPage orderId={orderId} payAmount={100} />}
+      />
     </div>
   );
 };

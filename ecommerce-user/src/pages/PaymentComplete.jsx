@@ -1,11 +1,54 @@
-import { useState } from "react"
+import { useState, useEffect } from "react";
+import { useSearchParams, useNavigate, Navigate } from "react-router-dom"; 
 import "./PaymentComplete.css"
 import Headers from "../components/Headers"
 import Footer from "../components/Footer"
 import Navigation from "../components/Navigation"
 
 const PaymentComplete = () => {
-    const formatPrice = (price) => price.toLocaleString('ko-KR');
+    const [searchParams] = useSearchParams();
+    const navigate = useNavigate();
+    const orderId = searchParams.get("orderId");
+    const [paymentData, setPaymentData] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+
+    useEffect(() => {
+        // 서버로부터 진짜 결제 정보를 다시 조회
+        const fetchPaymentDetails = async () => {
+            if (!orderId) {
+                setIsLoading(false);
+                return;
+            }
+
+            try {
+                // 이 주소는 회원님의 백엔드 API 엔드포인트에 맞춰 수정
+                const response = await fetch(`http://localhost:8888/api/payments/details?orderId=${orderId}`);
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    setPaymentData(data); // DB의 실시간 정보를 상태에 저장
+                }
+            } catch (error) {
+                console.error("결제 내역 조회 중 오류 발생:", error);
+            } finally {
+                setIsLoading(false);
+            }
+        };
+
+        fetchPaymentDetails();
+    }, [orderId]);
+
+    if (isLoading) {
+        return <div className="ebear-container" style={{ textAlign: 'center', padding: '100px' }}>결제 내역을 확인하고 있습니다...</div>;
+    }
+
+    // 비정상 접근 차단 (주문번호가 없거나 서버 조회에 실패한 경우)
+    if (!orderId || !paymentData) {
+        alert("유효하지 않은 주문 정보입니다. 메인 페이지로 이동합니다.");
+        return <Navigate to="/" replace />;
+    }
+
+    const formatPrice = (price) => price?.toLocaleString('ko-KR') || '0';
 
     let navigationMenu = [
         {
@@ -60,7 +103,7 @@ const PaymentComplete = () => {
         },
     ];
 
-    const totalPrice = 251720;
+    const totalPrice = paymentData?.totalAmount || 0;
 
     return (
         <div className="ebear-container">
@@ -79,6 +122,11 @@ const PaymentComplete = () => {
                 {/* 메인 콘텐츠 */}
                 <main className="main-content">
 
+                    <div style={{ marginBottom: "20px", fontSize: "16px" }}>
+                        <strong>주문번호:</strong> {orderId}
+                    </div>
+
+                    {/* 추후 주문한 상품 렌더링 필요 */}
                     <div className="payment-product-grid">
                         {products.map(product => (
                             <div key={product.id} className="payment-product-card">

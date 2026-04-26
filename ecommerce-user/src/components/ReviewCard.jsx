@@ -2,7 +2,7 @@ import { AvatarCustom, AvatarFallback, UserIcon } from "./CustomTag";
 import Rating from '@mui/material/Rating';
 import "./ReviewCard.css";
 
-const ReviewCard = ({rreviewPointate, reviewTitle, reviewContent, reviewer, regDttm}) => {
+const ReviewCard = ({reviewPoint, reviewTitle, reviewContent, reviewer, regDttm}) => {
     return (
         <div className="border-line">
             <div>
